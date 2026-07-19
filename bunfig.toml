@@ -1,0 +1,2 @@
+[install.scopes]
+"@emperorjs" = { token = "$VERDACCIO_TOKEN", url = "$VERDACCIO_REGISTRY" }
