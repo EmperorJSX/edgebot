@@ -1,0 +1,14 @@
+{
+  "id": "session-1784488288983",
+  "startedAt": "2026-07-19T19:11:28.983Z",
+  "cwd": "/home/ubuntu/projects/edgebot",
+  "context": {},
+  "metrics": {
+    "edits": 13,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-07-19T19:21:08.322Z",
+  "duration": 579339
+}

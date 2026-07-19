@@ -1,0 +1,10 @@
+services:
+  # Front-end mock dashboard: no db, no cache, no secrets. The image is built
+  # and pushed by CI; this file only pulls and runs it.
+  app:
+    image: registry.emperorjs.com/emperorjs/edgebot:latest
+    container_name: edgebot-app
+    pull_policy: always
+    restart: unless-stopped
+    ports:
+      - "3000"

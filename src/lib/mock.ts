@@ -1,6 +1,16 @@
-// Seeded mock data for the autonomous-agent demo. Front-end only: the numbers
-// mimic the real pipeline (model prob vs market price -> edge -> Kelly stake)
-// but nothing here touches TxLINE, Solana, or a backend.
+// Seeded mock data for the autonomous-agent demo. Front-end only: nothing here
+// touches TxLINE, Solana, or a backend, but every number is derived the same
+// way the real pipeline derives it from the TxLINE consensus odds stream:
+//
+//   TxLINE consensus stream field  -> mock field
+//   ------------------------------------------------------------------
+//   consensus decimal odds         -> price      (payout multiple on a win)
+//   1 / price                      -> implied    (market prob, vig included)
+//   implied / market overround     -> fair prob  (de-vigged consensus baseline)
+//   fair prob + model delta        -> prob       (edgebot's model probability)
+//   prob - implied                 -> edgePct    (model minus market, in points)
+//   fractional Kelly on (price-1)  -> stakePct   (percent of bankroll to stake)
+//   stakePct * bankroll            -> stakeUsd
 
 export type TeamCode =
   | "br" | "de" | "fr" | "ar" | "es" | "pt" | "en" | "nl" | "be"
@@ -14,11 +24,11 @@ export type Decision = {
   away: string;
   awayCode: TeamCode;
   prob: number; // model probability, 0..1
-  price: number; // decimal odds
-  edgePct: number; // signed percent
-  stakePct: number | null; // percent of bankroll, null when no stake
+  price: number; // decimal odds (TxLINE consensus)
+  edgePct: number; // (prob - 1/price) * 100, signed
+  stakePct: number | null; // fractional Kelly, percent of bankroll; null when Kelly <= 0
   stakeUsd: number | null;
-  signed: boolean;
+  signed: boolean; // false = skipped (thin/negative edge, or risk filter)
 };
 
 export type Stats = {
@@ -50,7 +60,36 @@ export const TEAMS: { code: TeamCode; name: string }[] = [
   { code: "sn", name: "Senegal" },
 ];
 
-// First paint matches context/designs/dashboard.png exactly.
+// Two-outcome market overround: the book's implied probs sum to ~1.05, so the
+// de-vigged fair prob is implied / OVERROUND. TxLINE's consensus feed carries
+// both sides; the mock only models the side we quote.
+const OVERROUND = 1.05;
+// Tenth Kelly: full Kelly is too volatile for an autonomous bankroll, the real
+// agent stakes a fixed fraction of the Kelly optimum.
+const KELLY_FRACTION = 0.1;
+const MAX_STAKE_PCT = 3.5;
+// Below this edge (in points) the agent never signs; above it, a risk filter
+// (exposure caps, correlated positions) can still skip.
+const MIN_EDGE_TO_SIGN = 1;
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const round3 = (n: number) => Math.round(n * 1000) / 1000;
+
+/** Derive edge and Kelly stake from price + model prob, exactly one way. */
+export function decide(price: number, prob: number, bankroll: number) {
+  const implied = 1 / price; // market prob, vig included
+  const edgePct = round2((prob - implied) * 100); // model minus market
+  const b = price - 1;
+  const fullKelly = (b * prob - (1 - prob)) / b; // f* = (bp - q) / b
+  const stakePct =
+    fullKelly > 0 ? round2(Math.min(MAX_STAKE_PCT, fullKelly * KELLY_FRACTION * 100)) : null;
+  const stakeUsd = stakePct !== null ? round2((stakePct / 100) * bankroll) : null;
+  return { edgePct, stakePct, stakeUsd };
+}
+
+// First paint mirrors context/designs/dashboard.png (same matches, times,
+// prices, signed/skipped pattern); edge and stake are recomputed through
+// decide() so every row is internally consistent.
 export const INITIAL_STATS: Stats = {
   bankroll: 12842.63,
   pnl24h: 1842.63,
@@ -59,17 +98,56 @@ export const INITIAL_STATS: Stats = {
   openPositions: 7,
 };
 
+function seedRow(
+  id: number,
+  time: string,
+  homeCode: TeamCode,
+  awayCode: TeamCode,
+  price: number,
+  prob: number,
+  signed: boolean
+): Decision {
+  const home = TEAMS.find((t) => t.code === homeCode)!;
+  const away = TEAMS.find((t) => t.code === awayCode)!;
+  return {
+    id,
+    time,
+    home: home.name,
+    homeCode,
+    away: away.name,
+    awayCode,
+    prob,
+    price,
+    signed,
+    ...decide(price, prob, INITIAL_STATS.bankroll),
+  };
+}
+
 export const INITIAL_DECISIONS: Decision[] = [
-  { id: 7, time: "14:32:18", home: "Brazil", homeCode: "br", away: "Germany", awayCode: "de", prob: 0.673, price: 1.72, edgePct: 12.48, stakePct: 2.31, stakeUsd: 296.7, signed: true },
-  { id: 6, time: "14:31:07", home: "France", homeCode: "fr", away: "Argentina", awayCode: "ar", prob: 0.581, price: 1.95, edgePct: 7.35, stakePct: 1.42, stakeUsd: 182.22, signed: true },
-  { id: 5, time: "14:29:54", home: "Spain", homeCode: "es", away: "Portugal", awayCode: "pt", prob: 0.612, price: 2.1, edgePct: 10.17, stakePct: 1.85, stakeUsd: 237.9, signed: true },
-  { id: 4, time: "14:28:33", home: "England", homeCode: "en", away: "Netherlands", awayCode: "nl", prob: 0.558, price: 1.88, edgePct: 5.63, stakePct: 0.98, stakeUsd: 125.98, signed: true },
-  { id: 3, time: "14:27:15", home: "Belgium", homeCode: "be", away: "Croatia", awayCode: "hr", prob: 0.536, price: 1.76, edgePct: 3.42, stakePct: 0.62, stakeUsd: 79.71, signed: false },
-  { id: 2, time: "14:26:02", home: "Uruguay", homeCode: "uy", away: "USA", awayCode: "us", prob: 0.492, price: 2.05, edgePct: -1.08, stakePct: null, stakeUsd: null, signed: false },
-  { id: 1, time: "14:24:48", home: "Morocco", homeCode: "ma", away: "Japan", awayCode: "jp", prob: 0.513, price: 1.9, edgePct: 1.47, stakePct: 0.28, stakeUsd: 36.02, signed: true },
+  seedRow(7, "14:32:18", "br", "de", 1.72, 0.673, true),
+  seedRow(6, "14:31:07", "fr", "ar", 1.95, 0.581, true),
+  seedRow(5, "14:29:54", "es", "pt", 2.1, 0.612, true),
+  seedRow(4, "14:28:33", "en", "nl", 1.88, 0.568, true),
+  seedRow(3, "14:27:15", "be", "hr", 1.76, 0.602, false), // positive edge, skipped by exposure cap
+  seedRow(2, "14:26:02", "uy", "us", 2.05, 0.477, false), // negative edge
+  seedRow(1, "14:24:48", "ma", "jp", 1.9, 0.541, true),
 ];
 
-export const CHART_DATES = ["May 26", "May 31", "Jun 5", "Jun 10", "Jun 15", "Jun 20", "Jun 25"];
+// ---------------------------------------------------------------------------
+// PnL chart: one master series, sliced per time range.
+
+export type Range = "1H" | "6H" | "24H" | "7D" | "30D" | "ALL";
+export const RANGES: Range[] = ["1H", "6H", "24H", "7D", "30D", "ALL"];
+
+/** Points = how much of the master series tail each range shows. */
+export const RANGE_WINDOWS: Record<Range, { points: number; labels: string[] }> = {
+  "1H": { points: 12, labels: ["13:35", "13:45", "13:55", "14:05", "14:15", "14:25"] },
+  "6H": { points: 24, labels: ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"] },
+  "24H": { points: 40, labels: ["15:00", "19:00", "23:00", "03:00", "07:00", "11:00"] },
+  "7D": { points: 56, labels: ["Jun 19", "Jun 20", "Jun 21", "Jun 22", "Jun 23", "Jun 24", "Jun 25"] },
+  "30D": { points: 90, labels: ["May 26", "May 31", "Jun 5", "Jun 10", "Jun 15", "Jun 20", "Jun 25"] },
+  "ALL": { points: 240, labels: ["Apr 6", "Apr 19", "May 2", "May 15", "May 28", "Jun 10", "Jun 25"] },
+};
 
 // ponytail: mulberry32, plenty for a demo and keeps SSR/client markup identical
 export function mulberry32(seed: number): () => number {
@@ -82,13 +160,15 @@ export function mulberry32(seed: number): () => number {
   };
 }
 
-/** 30D PnL walk shaped like the design: early dip below zero, then a climb. */
-export function buildPnlSeries(points = 90, seed = 11): number[] {
-  const rng = mulberry32(seed);
+/** Master PnL walk since inception (240 points = ALL). The last 90 points keep
+ * the design's 30D shape: early dip below zero, then a climb. */
+export function buildPnlSeries(points = 240, seed = 11): number[] {
   const anchors: [number, number][] = [
-    [0, -60], [8, 260], [16, -80], [23, -680], [32, 250], [45, 1050],
-    [58, 1480], [68, 1850], [78, 2150], [points - 1, 2760],
+    [0, 0], [30, 160], [55, -120], [85, 340], [115, 120], [150, -60],
+    [158, 260], [166, -80], [173, -680], [182, 250], [195, 1050],
+    [208, 1480], [218, 1850], [228, 2150], [points - 1, 2760],
   ];
+  const rng = mulberry32(seed);
   const at = (i: number) => {
     let k = 0;
     while (k < anchors.length - 2 && anchors[k + 1][0] < i) k++;
@@ -105,7 +185,6 @@ export function buildSparkline(seed: number, points: number, drift: number): num
   return Array.from({ length: points }, () => (v += drift + (rng() - 0.5) * 3));
 }
 
-const round2 = (n: number) => Math.round(n * 100) / 100;
 const fmtClock = (s: number) =>
   [Math.floor(s / 3600) % 24, Math.floor(s / 60) % 60, s % 60]
     .map((n) => String(n).padStart(2, "0"))
@@ -119,7 +198,8 @@ export type Tick = {
 };
 
 /** Deterministic decision stream. Same seed -> identical demo run every time,
- * which makes video takes reproducible. */
+ * which makes video takes reproducible. Every appended row goes through the
+ * same de-vig -> model prob -> edge -> Kelly derivation as the seed rows. */
 export function createDemoFeed(seed = 7) {
   const rng = mulberry32(seed);
   let clock = 14 * 3600 + 32 * 60 + 18; // continues from the last design row
@@ -132,14 +212,15 @@ export function createDemoFeed(seed = 7) {
     const home = TEAMS[hi];
     const away = TEAMS[(hi + 1 + aj) % TEAMS.length];
 
+    // TxLINE consensus decimal odds for the home side.
     const price = round2(1.55 + rng() * 1.1);
-    const prob = Math.min(0.78, Math.max(0.42, 1 / price + rng() * 0.17 - 0.05));
-    const edge = prob * price - 1;
-    const edgePct = round2(edge * 100);
-    // ponytail: stake ~ edge scaled to match the design's numbers, not real Kelly
-    const stakePct = edge > 0.005 ? round2(Math.min(3.2, edgePct * 0.19 + rng() * 0.12)) : null;
-    const stakeUsd = stakePct !== null ? round2((stakePct / 100) * bankroll) : null;
-    const signed = edge >= 0.03 && rng() > 0.15;
+    // De-vig the quote, then let the model disagree with the fair baseline by
+    // a small delta. Positive delta -> value on this side.
+    const fair = 1 / price / OVERROUND;
+    const prob = round3(Math.min(0.92, Math.max(0.08, fair + (rng() * 0.16 - 0.045))));
+    const { edgePct, stakePct, stakeUsd } = decide(price, prob, bankroll);
+    // Risk filter: even a positive edge is occasionally skipped (exposure cap).
+    const signed = edgePct >= MIN_EDGE_TO_SIGN && rng() > 0.15;
 
     const decision: Decision = {
       id: id++,
