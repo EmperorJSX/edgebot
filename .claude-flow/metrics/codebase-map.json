@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-19T18:42:20.475Z",
+  "projectRoot": "/home/ubuntu/projects/edgebot",
+  "structure": {
+    "hasPackageJson": true,
+    "hasTsConfig": true,
+    "hasClaudeConfig": false,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1784486540475
+}
