@@ -1,0 +1,102 @@
+// Country flags via flagcdn.com, the same approach as goal2026/src/lib/flagUrl.ts:
+// map a national-team name to its ISO 3166-1 alpha-2 code and load the w640 PNG.
+// This covers every nation (flagcdn hosts them all) instead of a hardcoded
+// handful of inline SVGs. UK home nations use flagcdn's regional codes.
+
+/** flagcdn.com URL for an ISO 3166-1 alpha-2 code (w640 for crisp rendering). */
+export function flagUrl(countryCode: string): string {
+  return `https://flagcdn.com/w640/${countryCode?.toLowerCase()}.png`;
+}
+
+/** Lowercased national-team name -> iso2. Fixture feeds spell teams by common
+ * English name; aliases cover the usual variants. */
+const NAME_TO_ISO2: Record<string, string> = {
+  albania: "al",
+  algeria: "dz",
+  argentina: "ar",
+  australia: "au",
+  austria: "at",
+  belgium: "be",
+  bolivia: "bo",
+  bosnia: "ba",
+  "bosnia and herzegovina": "ba",
+  brazil: "br",
+  bulgaria: "bg",
+  cameroon: "cm",
+  canada: "ca",
+  "cape verde": "cv",
+  chile: "cl",
+  china: "cn",
+  colombia: "co",
+  "costa rica": "cr",
+  croatia: "hr",
+  curacao: "cw",
+  "czech republic": "cz",
+  czechia: "cz",
+  denmark: "dk",
+  "dr congo": "cd",
+  ecuador: "ec",
+  egypt: "eg",
+  england: "gb-eng",
+  finland: "fi",
+  france: "fr",
+  germany: "de",
+  ghana: "gh",
+  greece: "gr",
+  haiti: "ht",
+  honduras: "hn",
+  hungary: "hu",
+  iceland: "is",
+  iran: "ir",
+  iraq: "iq",
+  ireland: "ie",
+  "republic of ireland": "ie",
+  israel: "il",
+  italy: "it",
+  "ivory coast": "ci",
+  "cote d'ivoire": "ci",
+  jamaica: "jm",
+  japan: "jp",
+  jordan: "jo",
+  mexico: "mx",
+  morocco: "ma",
+  netherlands: "nl",
+  "new zealand": "nz",
+  nigeria: "ng",
+  "north macedonia": "mk",
+  norway: "no",
+  panama: "pa",
+  paraguay: "py",
+  peru: "pe",
+  poland: "pl",
+  portugal: "pt",
+  qatar: "qa",
+  romania: "ro",
+  russia: "ru",
+  "saudi arabia": "sa",
+  scotland: "gb-sct",
+  senegal: "sn",
+  serbia: "rs",
+  slovakia: "sk",
+  slovenia: "si",
+  "south africa": "za",
+  "south korea": "kr",
+  "korea republic": "kr",
+  spain: "es",
+  sweden: "se",
+  switzerland: "ch",
+  tunisia: "tn",
+  turkey: "tr",
+  ukraine: "ua",
+  "united states": "us",
+  usa: "us",
+  uruguay: "uy",
+  uzbekistan: "uz",
+  venezuela: "ve",
+  wales: "gb-wls",
+};
+
+/** iso2 for a team name, or null when it is not a known nation (club sides). */
+export function teamIso2(name: string): string | null {
+  return NAME_TO_ISO2[name.trim().toLowerCase()] ?? null;
+}

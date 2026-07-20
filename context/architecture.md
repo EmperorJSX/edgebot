@@ -15,7 +15,7 @@
 | Realtime   | Redis pub/sub → standalone **Bun** WebSocket gateway                   |
 | Runtime    | Bun (package manager + runs the gateway)                               |
 
-> Next.js 16 differs from training data — read `node_modules/next/dist/docs/` before writing framework code.
+> Next.js 16 differs from training data - read `node_modules/next/dist/docs/` before writing framework code.
 
 ## File layout
 
@@ -23,7 +23,7 @@
 src/
   app/
     (auth)/login/            token login (outside Providers)
-    (app)/                   authed area — layout does requireAuth() + <Providers><AppShell>
+    (app)/                   authed area - layout does requireAuth() + <Providers><AppShell>
       dashboard/ ideas/ projects/ teams/   thin pages → client components
     api/[[...route]]/route.ts   the ONLY api file: handle(app)
     layout.tsx               root: fonts + <ThemeProvider>
@@ -45,11 +45,11 @@ src/
 
 ## The module pattern (replicate for every new module)
 
-1. **Schema** — add table(s) to `src/backend/db/schema.ts`, `bunx drizzle-kit push`.
-2. **Route** — `src/backend/routes/<m>.ts`: one chained `new Hono().get().post().patch().delete()`, each handler guarded by `authed(c)`, bodies validated with `zValidator("json", schema)`. After every write, `await publishInvalidation([wsTopic("get","<m>")])`.
-3. **Compose** — add `.route("/<m>", <m>)` to `src/backend/app.ts` (keeps `AppType` complete for RPC).
-4. **UI** — `<M>List` / `<M>Form` / `<M>Detail` client components using `useHonoQuery`/`useHonoMutation` against `client.<m>.*`. Detail derives its record from the list query (one source of truth, stays live). Pages in `src/app/(app)/<m>/` are thin wrappers.
-5. **Shared meta** — fixed option lists / status labels+styles in `src/lib/<m>.ts` (client-safe, no server imports).
+1. **Schema** - add table(s) to `src/backend/db/schema.ts`, `bunx drizzle-kit push`.
+2. **Route** - `src/backend/routes/<m>.ts`: one chained `new Hono().get().post().patch().delete()`, each handler guarded by `authed(c)`, bodies validated with `zValidator("json", schema)`. After every write, `await publishInvalidation([wsTopic("get","<m>")])`.
+3. **Compose** - add `.route("/<m>", <m>)` to `src/backend/app.ts` (keeps `AppType` complete for RPC).
+4. **UI** - `<M>List` / `<M>Form` / `<M>Detail` client components using `useHonoQuery`/`useHonoMutation` against `client.<m>.*`. Detail derives its record from the list query (one source of truth, stays live). Pages in `src/app/(app)/<m>/` are thin wrappers.
+5. **Shared meta** - fixed option lists / status labels+styles in `src/lib/<m>.ts` (client-safe, no server imports).
 
 ## Data flow
 

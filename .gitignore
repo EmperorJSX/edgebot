@@ -43,3 +43,6 @@ next-env.d.ts
 
 .temp.claude-flow/
 .swarm/
+
+# runtime data (TxLINE credentials, decision logs)
+/data/

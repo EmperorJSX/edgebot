@@ -1,0 +1,17 @@
+- generic [active] [ref=f2e1]:
+  - main [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - generic [ref=f2e4]:
+        - generic [ref=f2e5]:
+          - img "edgebot" [ref=f2e6]
+          - generic [ref=f2e7]: edgebot
+        - generic [ref=f2e8]: CONNECTING
+      - generic [ref=f2e11]:
+        - generic [ref=f2e12]:
+          - generic [ref=f2e13]: BANKROLL (USDC)
+          - generic [ref=f2e14]: $12,842.63
+        - generic [ref=f2e16]:
+          - generic [ref=f2e17]: PNL (24H)
+          - generic [ref=f2e18]: +$1,842.63
+        - button "Switch to dark mode" [ref=f2e19] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=f2e77] [cursor=pointer]

@@ -1,6 +1,6 @@
 # UI Rules
 
-How to build EmperorJS Projects UI. The designs in `context/designs/` are the source of truth for visuals; these rules keep things consistent. Use tokens from `context/ui-tokens.md` — never hardcode colors.
+How to build EmperorJS Projects UI. The designs in `context/designs/` are the source of truth for visuals; these rules keep things consistent. Use tokens from `context/ui-tokens.md` - never hardcode colors.
 
 ---
 
@@ -8,24 +8,24 @@ How to build EmperorJS Projects UI. The designs in `context/designs/` are the so
 
 Design the **small screen first**, then layer breakpoints up.
 
-- Base classes target mobile. Add `md:` / `lg:` for larger screens — never the reverse.
+- Base classes target mobile. Add `md:` / `lg:` for larger screens - never the reverse.
 - Grids start single-column: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`.
 - Tap targets ≥ 36px. Don't rely on hover for anything essential.
 - Test at 375px wide before anything else.
 
 ## Light + dark
 
-Every screen must work in both themes. Because we use semantic tokens, this is automatic — but:
+Every screen must work in both themes. Because we use semantic tokens, this is automatic - but:
 
 - Never use a literal color where a token exists.
-- Test both themes (toggle in the sidebar / mobile top bar — `<ThemeToggle>`).
+- Test both themes (toggle in the sidebar / mobile top bar - `<ThemeToggle>`).
 - Don't set a fixed white/black; use `bg-card` / `text-foreground`.
 
 ## App shell (`<AppShell>`)
 
-The authed area uses a **sidebar on desktop, drawer on mobile** (matches the design — not a top navbar):
+The authed area uses a **sidebar on desktop, drawer on mobile** (matches the design - not a top navbar):
 
-- **md+**: fixed left sidebar (`w-60`, `bg-sidebar`, `border-r border-border`) — brand, nav, then user card + theme toggle + sign-out pinned to the bottom.
+- **md+**: fixed left sidebar (`w-60`, `bg-sidebar`, `border-r border-border`) - brand, nav, then user card + theme toggle + sign-out pinned to the bottom.
 - **mobile**: a top bar (hamburger + brand + theme toggle); tapping the hamburger opens an off-canvas drawer with the same nav. Nav taps close the drawer.
 - **Active nav item**: `bg-primary/10 text-primary`. Idle: `text-muted-foreground hover:bg-accent`. Active state is derived from `usePathname()`.
 - Nav icons are from **lucide-react**. Unbuilt modules render as disabled "Coming soon" rows.
@@ -33,7 +33,7 @@ The authed area uses a **sidebar on desktop, drawer on mobile** (matches the des
 
 ## Cards
 
-Every content block is a card: `rounded-xl border border-border bg-card p-4` (or `p-6`). Color lives _inside_ cards (badges, text, icons) — never tint the card surface itself.
+Every content block is a card: `rounded-xl border border-border bg-card p-4` (or `p-6`). Color lives _inside_ cards (badges, text, icons) - never tint the card surface itself.
 
 ## Typography
 
@@ -77,5 +77,5 @@ Colored circle with an initial: `flex size-8 items-center justify-center rounded
 - Never tint a card background.
 - Never build desktop-first then bolt on mobile.
 - Never assume light mode (no literal white/black).
-- Never show raw API errors — surface human-readable text.
-- Never call `fetch` in a component — use `useHonoQuery` / `useHonoMutation`.
+- Never show raw API errors - surface human-readable text.
+- Never call `fetch` in a component - use `useHonoQuery` / `useHonoMutation`.

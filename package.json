@@ -4,11 +4,12 @@
   "private": true,
   "description": "Autonomous value-betting agent: TxLINE odds -> de-vig -> edge -> Kelly -> auto-signed devnet bet.",
   "scripts": {
-    "dev": "next dev -p 6060",
+    "dev": "DEMO=1 next dev -p 6060",
+    "dev:live": "next dev -p 6060",
     "build": "next build",
     "start": "next start -p 3000",
-    "agent": "bun run src/agent.ts",
-    "agent:replay": "MODE=replay bun run src/agent.ts",
+    "demo": "bun run src/engine/demo.ts",
+    "txline:subscribe": "bun run src/txline/subscribe.ts",
     "txline:record": "bun run src/txline/record.ts",
     "strategy:check": "bun run src/strategy/selfcheck.ts",
     "lint": "eslint"

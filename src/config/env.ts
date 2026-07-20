@@ -55,7 +55,12 @@ const SecretsSchema = z.object({
   MIN_STAKE: z.coerce.number().min(0).default(1),
 
   // Run mode. "replay" re-emits a recorded fixtures file deterministically.
+  // DEMO=1 is the judge switch: forces replay mode and a fast tick so the
+  // autonomous loop visibly runs within seconds, zero config needed.
   MODE: z.enum(["live", "replay"]).default("live"),
+  DEMO: z.stringbool().default(false),
+  // Runner tick interval override (ms). Unset = 60s live, 2s demo/replay.
+  TICK_INTERVAL_MS: z.coerce.number().positive().optional(),
   REPLAY_FILE: z.string().default("fixtures/sample-worldcup.jsonl"),
   REPLAY_SPEED_MS: z.coerce.number().min(0).default(250), // gap between replayed ticks
   GRADE_INTERVAL_MS: z.coerce.number().min(1000).default(60000),
@@ -76,6 +81,9 @@ function initEnv(): Readonly<EnvSchema> {
     const env = EnvironmentSchema.parse(process.env);
     env.IS_PROD = isProd;
     env.IS_DEV = !isProd;
+    // DEMO is the judge switch: force the replay path everywhere (txline
+    // facade, engine, runner interval) with a single flag.
+    if (env.DEMO) env.MODE = "replay";
     return Object.freeze(env);
   } catch (error) {
     if (error instanceof ZodError) {

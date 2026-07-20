@@ -4,7 +4,7 @@ Conventions actually used in this codebase. Match the surrounding code.
 
 ## TypeScript
 
-- `strict` is on. No `any` in committed code — prefer precise types or `unknown` + narrowing.
+- `strict` is on. No `any` in committed code - prefer precise types or `unknown` + narrowing.
 - Derive types from the source of truth: Drizzle (`typeof table.$inferSelect`), zod (`z.infer`), Hono RPC (`InferRequestType`/`InferResponseType`). Don't hand-write shapes the framework can infer.
 - Keep `bunx tsc --noEmit` and `bun run lint` clean before considering a feature done.
 
@@ -38,6 +38,6 @@ Conventions actually used in this codebase. Match the surrounding code.
 ## General
 
 - Reuse before adding: check `ui-registry.md` (incl. its "Shared building blocks" table) and `src/lib/*`.
-- **DRY — no copy-paste.** If you're about to paste a block you've already written elsewhere, stop and extract it instead: a component (`src/components/`), hook (`src/hooks/`), helper (`src/lib/`), or backend helper (e.g. `deleteById`/`persistTabs`). Parameterize small visual differences with a prop; don't fork. Run `bun dupes-check` before a feature is done — it must not report new clones. Backend routes keep their inline `authed(c)` guard + 404 (Hono RPC needs inline handlers); that's the only sanctioned repetition.
-- No speculative abstractions — build the minimum that works, following the established module pattern. (DRY is about *removing real duplication*, not pre-building shared code for one use.)
+- **DRY - no copy-paste.** If you're about to paste a block you've already written elsewhere, stop and extract it instead: a component (`src/components/`), hook (`src/hooks/`), helper (`src/lib/`), or backend helper (e.g. `deleteById`/`persistTabs`). Parameterize small visual differences with a prop; don't fork. Run `bun dupes-check` before a feature is done - it must not report new clones. Backend routes keep their inline `authed(c)` guard + 404 (Hono RPC needs inline handlers); that's the only sanctioned repetition.
+- No speculative abstractions - build the minimum that works, following the established module pattern. (DRY is about *removing real duplication*, not pre-building shared code for one use.)
 - Update `progress-tracker.md` and `ui-registry.md` after each feature.

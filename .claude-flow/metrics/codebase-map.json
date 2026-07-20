@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-19T19:13:37.732Z",
+  "timestamp": "2026-07-20T01:28:41.915Z",
   "projectRoot": "/home/ubuntu/projects/edgebot",
   "structure": {
     "hasPackageJson": true,
@@ -7,5 +7,5 @@
     "hasClaudeConfig": false,
     "hasClaudeFlow": true
   },
-  "scannedAt": 1784488417732
+  "scannedAt": 1784510921915
 }
